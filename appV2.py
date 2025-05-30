@@ -133,9 +133,7 @@ if st.session_state.profile_complete:
         if message["role"] != "system":  # Don't display system messages in chat
             avatar = USER_AVATAR if message["role"] == "user" else BOT_AVATAR
             with st.chat_message(message["role"], avatar=avatar):
-                st.markdown(message["content"])
-
-    # Main chat interface
+                st.markdown(message["content"])  # Main chat interface
     if prompt := st.chat_input("How can I help?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar=USER_AVATAR):
@@ -156,4 +154,4 @@ if st.session_state.profile_complete:
             {"role": "assistant", "content": full_response}
         )
 
-    # streamlit run appV1.py
+    # streamlit run appV2.py

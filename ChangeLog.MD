@@ -20,12 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Profile reset functionality in sidebar
 - Session state management for profile data persistence
 - System message integration with user profile for context-aware responses
+- Automatic inclusion of user profile information in all chat interactions with the AI bot
 
 ### Changed
 - Chat interface now only appears after profile completion
 - Added profile completion status tracking in session state
 - Enhanced sidebar with profile reset option alongside existing delete history button
 - Improved user experience with clear section headers and form organization
+- AI bot now receives user profile context for personalized responses based on nursing role, work area, education, grade level, and experience
 
 ## [0.1.1] - 5-30-2025
 ### Changed

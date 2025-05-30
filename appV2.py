@@ -32,6 +32,8 @@ if "user_profile" not in st.session_state:
         "education": None,
         "grade": None,
         "experience": None,
+        "functional_statement_choice": None,
+        "functional_statement_content": None,
     }
 
 # Sidebar with a button to delete chat history
@@ -47,6 +49,8 @@ with st.sidebar:
             "education": None,
             "grade": None,
             "experience": None,
+            "functional_statement_choice": None,
+            "functional_statement_content": None,
         }
 
 # User Profile Questions Section
@@ -90,17 +94,77 @@ if not st.session_state.profile_complete:
             key="experience_input",
         )
 
+        st.markdown("### Question 6")
+        functional_statement_choice = st.radio(
+            "Would you like to upload or copy and paste your functional statement? If you do, please do so now.",
+            options=["Yes", "No"],
+            index=None,
+            key="functional_statement_radio",
+        )
+
+        functional_statement_content = None
+        if functional_statement_choice == "Yes":
+            st.markdown("#### Upload your functional statement:")
+            uploaded_file = st.file_uploader(
+                "Choose a file",
+                type=["txt", "docx", "pdf"],
+                key="functional_statement_file",
+            )
+
+            if uploaded_file is not None:
+                try:
+                    if uploaded_file.type == "text/plain":
+                        # Handle .txt files
+                        functional_statement_content = str(
+                            uploaded_file.read(), "utf-8"
+                        )
+                    elif (
+                        uploaded_file.type
+                        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    ):
+                        # Handle .docx files
+                        st.info(
+                            "DOCX file uploaded. Content extraction would require additional libraries (python-docx)."
+                        )
+                        functional_statement_content = (
+                            f"DOCX file uploaded: {uploaded_file.name}"
+                        )
+                    elif uploaded_file.type == "application/pdf":
+                        # Handle .pdf files
+                        st.info(
+                            "PDF file uploaded. Content extraction would require additional libraries (PyPDF2 or pdfplumber)."
+                        )
+                        functional_statement_content = (
+                            f"PDF file uploaded: {uploaded_file.name}"
+                        )
+                    else:
+                        st.error("Unsupported file type")
+                except Exception as e:
+                    st.error(f"Error reading file: {e}")
+                    functional_statement_content = (
+                        f"Error reading file: {uploaded_file.name}"
+                    )
+
         submitted = st.form_submit_button("Complete Profile")
 
         if submitted:
             # Validate all fields are filled
-            if role and work_area and education and grade and experience:
+            if (
+                role
+                and work_area
+                and education
+                and grade
+                and experience
+                and functional_statement_choice
+            ):
                 st.session_state.user_profile = {
                     "role": role,
                     "work_area": work_area,
                     "education": education,
                     "grade": grade,
                     "experience": experience,
+                    "functional_statement_choice": functional_statement_choice,
+                    "functional_statement_content": functional_statement_content,
                 }
                 st.session_state.profile_complete = True
 

@@ -199,8 +199,91 @@ if st.session_state.get("show_action_question", False):
         st.session_state.messages.append(
             {"role": "user", "content": f"Selected action: {action}"}
         )
-        st.success(f"You selected: {action}. You can now start chatting.")
-        st.rerun()
+        # --- Load evaluation_bullets.txt and append as system message ---
+        try:
+            with open(
+                os.path.join("data", "evaluation_bullets.txt"),
+                "r",
+                encoding="utf-8",
+            ) as f:
+                eval_instructions = f.read()
+            st.session_state.messages.append(
+                {"role": "system", "content": eval_instructions}
+            )
+        except Exception as e:
+            st.warning(f"Could not load evaluation instructions: {e}")
+        # --------------------------------------------------------------
+
+        submitted = False
+        if action == "Annual evaluation":
+            st.info(
+                "Please copy and paste bullets or a paragraph containing your accomplishments. You can also include items that you struggle with."
+            )
+            with st.form("annual_eval_form"):
+                annual_eval = st.text_area(
+                    "Accomplishments and/or Struggles",
+                    key="annual_eval_accomplishments",
+                    height=200,
+                    placeholder="Paste your accomplishments and struggles here...",
+                )
+                submit_btn = st.form_submit_button("Submit")
+                if submit_btn:
+                    if not annual_eval:
+                        st.warning(
+                            "Please enter your accomplishments or struggles before submitting."
+                        )
+                        st.stop()
+                    with st.spinner("Uploading..."):
+                        st.session_state["annual_eval_accomplishments"] = annual_eval
+                        submitted = True
+        elif action == "Promotion contribution":
+            st.info(
+                "Please describe your contributions or achievements that support your promotion request."
+            )
+            with st.form("promotion_contrib_form"):
+                promotion_contrib = st.text_area(
+                    "Promotion Contributions",
+                    key="promotion_contributions",
+                    height=200,
+                    placeholder="Describe your promotion contributions here...",
+                )
+                submit_btn = st.form_submit_button("Submit")
+                if submit_btn:
+                    if not promotion_contrib:
+                        st.warning(
+                            "Please enter your promotion contributions before submitting."
+                        )
+                        st.stop()
+                    with st.spinner("Uploading..."):
+                        st.session_state["promotion_contributions"] = promotion_contrib
+                        submitted = True
+        elif action == "Skills development":
+            st.info(
+                "Please describe the skills you wish to develop or areas where you seek improvement."
+            )
+            with st.form("skills_dev_form"):
+                skills_dev = st.text_area(
+                    "Skills Development Goals",
+                    key="skills_development",
+                    height=200,
+                    placeholder="Describe your skills development goals here...",
+                )
+                submit_btn = st.form_submit_button("Submit")
+                if submit_btn:
+                    if not skills_dev:
+                        st.warning(
+                            "Please enter your skills development goals before submitting."
+                        )
+                        st.stop()
+                    with st.spinner("Uploading..."):
+                        st.session_state["skills_development"] = skills_dev
+                        submitted = True
+
+        if submitted:
+            st.success(f"You selected: {action}. You can now start chatting.")
+            st.rerun()
+        else:
+            st.stop()
 
 # Only show chat interface if profile is complete and action is selected
 if st.session_state.profile_complete and not st.session_state.get(
@@ -216,6 +299,24 @@ if st.session_state.profile_complete and not st.session_state.get(
         st.write(f"**Education:** {profile['education']}")
         st.write(f"**Grade:** {profile['grade']}")
         st.write(f"**Experience:** {profile['experience']}")
+
+    # Display action-specific input as reference
+    selected_action = st.session_state.get("selected_action")
+    if selected_action == "Annual evaluation":
+        accomplishments = st.session_state.get("annual_eval_accomplishments")
+        if accomplishments:
+            with st.expander("Your Annual Evaluation Input", expanded=True):
+                st.markdown(accomplishments)
+    elif selected_action == "Promotion contribution":
+        promotion_contrib = st.session_state.get("promotion_contributions")
+        if promotion_contrib:
+            with st.expander("Your Promotion Contributions Input", expanded=True):
+                st.markdown(promotion_contrib)
+    elif selected_action == "Skills development":
+        skills_dev = st.session_state.get("skills_development")
+        if skills_dev:
+            with st.expander("Your Skills Development Input", expanded=True):
+                st.markdown(skills_dev)
 
     # Display chat messages (excluding system messages)
     for message in st.session_state.messages:

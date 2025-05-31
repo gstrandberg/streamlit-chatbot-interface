@@ -21,9 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Session state management for profile data persistence
 - System message integration with user profile for context-aware responses
 - Automatic inclusion of user profile information in all chat interactions with the AI bot
+- **New:** After profile completion, added Question 7: "What action would you like to perform?" (radio button: Annual evaluation, Promotion contribution, Skills development). This is required before chat interface is shown. User's choice is stored in session state but not included in the profile summary. The user's selection is now echoed as a user message in the chat history.
+- **New:** If Question 6 (functional statement upload) is answered 'Yes', the user must upload a file before proceeding to Question 7. The form cannot be submitted until a file is uploaded.
 
 ### Changed
-- Chat interface now only appears after profile completion
+- Chat interface now only appears after profile completion **and** action selection (Question 7)
 - Added profile completion status tracking in session state
 - Enhanced sidebar with profile reset option alongside existing delete history button
 - Improved user experience with clear section headers and form organization

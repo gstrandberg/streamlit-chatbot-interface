@@ -110,11 +110,10 @@ if not st.session_state.profile_complete:
                 type=["txt", "docx", "pdf"],
                 key="functional_statement_file",
             )
-
+            # Require file upload before proceeding
             if uploaded_file is not None:
                 try:
                     if uploaded_file.type == "text/plain":
-                        # Handle .txt files
                         functional_statement_content = str(
                             uploaded_file.read(), "utf-8"
                         )
@@ -122,7 +121,6 @@ if not st.session_state.profile_complete:
                         uploaded_file.type
                         == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     ):
-                        # Handle .docx files
                         st.info(
                             "DOCX file uploaded. Content extraction would require additional libraries (python-docx)."
                         )
@@ -130,7 +128,6 @@ if not st.session_state.profile_complete:
                             f"DOCX file uploaded: {uploaded_file.name}"
                         )
                     elif uploaded_file.type == "application/pdf":
-                        # Handle .pdf files
                         st.info(
                             "PDF file uploaded. Content extraction would require additional libraries (PyPDF2 or pdfplumber)."
                         )
@@ -144,6 +141,8 @@ if not st.session_state.profile_complete:
                     functional_statement_content = (
                         f"Error reading file: {uploaded_file.name}"
                     )
+            else:
+                st.info("Please upload your functional statement before continuing.")
 
         submitted = st.form_submit_button("Complete Profile")
 
@@ -156,6 +155,9 @@ if not st.session_state.profile_complete:
                 and grade
                 and experience
                 and functional_statement_choice
+                and (
+                    functional_statement_choice == "No" or functional_statement_content
+                )
             ):
                 st.session_state.user_profile = {
                     "role": role,
@@ -174,13 +176,37 @@ if not st.session_state.profile_complete:
                     {"role": "system", "content": profile_summary}
                 )
 
-                st.success("Profile completed! You can now start chatting.")
+                st.success(
+                    "Profile completed! Please answer the next question to continue."
+                )
+                st.session_state.show_action_question = True
                 st.rerun()
             else:
                 st.error("Please answer all questions before continuing.")
 
-# Only show chat interface if profile is complete
-if st.session_state.profile_complete:
+# After profile is complete but before chat interface, ask Question 7
+if st.session_state.get("show_action_question", False):
+    st.header("Next Step")
+    action = st.radio(
+        "Question 7: What action would you like to perform?",
+        options=["Annual evaluation", "Promotion contribution", "Skills development"],
+        index=None,
+        key="action_radio",
+    )
+    if action:
+        st.session_state.selected_action = action
+        st.session_state.show_action_question = False
+        # Echo the user's selection in the chat
+        st.session_state.messages.append(
+            {"role": "user", "content": f"Selected action: {action}"}
+        )
+        st.success(f"You selected: {action}. You can now start chatting.")
+        st.rerun()
+
+# Only show chat interface if profile is complete and action is selected
+if st.session_state.profile_complete and not st.session_state.get(
+    "show_action_question", False
+):
     st.header("Chat Interface")
 
     # Display user profile summary
